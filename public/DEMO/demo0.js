@@ -210,6 +210,7 @@ $(document).ready(() => {
     drawScore();
     drawLives();
     collisionDetection()
+    stage.update();
     requestAnimationFrame(draw);
   }
 
@@ -236,6 +237,7 @@ $(document).ready(() => {
       }, 1000);
     start.on('click', e => {
       stage.removeChild(start);
+
       draw();
     });
 
