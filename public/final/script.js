@@ -6,7 +6,7 @@ $(document).ready(() => {
   const WALL_THICKNESS = 20;
   const PADDLE_WIDTH = 300;
   const PADDLE_SPEED = 16;
-  const PUCK_SPEED = 5;
+  const PUCK_SPEED = 15;
   const PADDLE_HITS_FOR_NEW_LEVEL = 5;
   const SCORE_BOARD_HEIGHT = 50;
   const ARROW_KEY_LEFT = 37;
@@ -110,9 +110,9 @@ $(document).ready(() => {
       src: "icon/6.png"
     }]);
 
-    //repo.on('complete', newGame);
-    newGame();
-    startGame();
+    repo.on('complete', newGame);
+    //newGame();
+    //startGame();
   }
 
 
@@ -124,8 +124,7 @@ $(document).ready(() => {
       new createjs.Bitmap(repo.getResult('ic3')),
       new createjs.Bitmap(repo.getResult('ic4')),
       new createjs.Bitmap(repo.getResult('ic5')),
-      new createjs.Bitmap(repo.getResult('ic6')),
-      new createjs.Bitmap(repo.getResult('ic7'))
+      new createjs.Bitmap(repo.getResult('ic6'))
     ];
 
     for (var i = 0; i < icon.length; i++) {
@@ -148,6 +147,7 @@ $(document).ready(() => {
     setControls();
     newLevel();
     newLevel();
+    startGame();
   }
 
   function buildWalls() {
@@ -281,9 +281,9 @@ $(document).ready(() => {
         brick.freeLife = freeLifeTxt;
         stage.addChild(freeLifeTxt);
 
-        icon[i].x = freeLifeTxt.x - 4;
-        icon[i].y = freeLifeTxt.y - 6;
-        stage.addChild(icon[i])
+        // icon[i].x = freeLifeTxt.x - 4;
+        // icon[i].y = freeLifeTxt.y - 6;
+        // stage.addChild(icon[i])
       }
       xPos += brick.width;
       if (xPos > (brick.width * 10)) {
@@ -372,6 +372,9 @@ $(document).ready(() => {
         combo++;
         if (brick.freeLife) {
           lives++;
+          //get food
+          getFood(i);
+
           createjs.Tween.get(brick.freeLife)
             .to({
               alpha: 0,
@@ -411,6 +414,59 @@ $(document).ready(() => {
     }
   }
 
+  let count = 0;
+  //let foodFallX = canvas.width/3;
+  //let foodFallY = canvas.height-100;
+  function getFood(j) {
+
+    if(count > 5) {
+      return;
+    }
+
+    icon[count].x = bricks[j].x + 40;
+    icon[count].y = bricks[j].y;
+    stage.addChild(icon[count]);
+
+    if(count === 5) {
+      setTimeout(function() {
+        createjs.Tween.get(icon[count], {loop:false}).to({x:canvas.width/6+count*180, y:canvas.height-100, scaleX: 0.2, scaleY: 0.2}, 1000);
+      }, 20000);
+      gameOver();
+      count = 0;
+    }
+
+    createjs.Tween.get(icon[count], {loop:false}).to({x:canvas.width/6+count*180, y:canvas.height-100, scaleX: 0.2, scaleY: 0.2}, 1000);
+    count += 1;
+    console.log(count);
+  }
+
+  let myScore;
+  let word;
+  function finishFood() {
+    if(count === 0) {
+      myScore = 0;
+    }
+    else if(count ===1) {
+      myScore = 1;
+    }
+    else if(count ===2) {
+      myScore = 2;
+    }
+    else if(count ===3) {
+      myScore = 3;
+    }
+    else if(count ===4) {
+      myScore = 4;
+    }
+    else if(count ===5) {
+      myScore = 5;
+    }
+    word = new createjs.Text(myScore, '74px 華康郭泰碑W4', '#800040');
+    word.y = canvas.width/2;
+    stage.addChild(word);
+
+  }
+
   function render() {
     paddle.x = paddle.nextX;
     puck.x = puck.nextX;
@@ -443,6 +499,7 @@ $(document).ready(() => {
   }
 
   function gameOver() {
+    finishFood();
     createjs.Ticker.setPaused(true);
     gameRunning = false;
     messageTxt.text = "press spacebar to play";
@@ -470,6 +527,7 @@ $(document).ready(() => {
     messageTxt.text = "press spacebar to pause";
     stage.update();
     removeBricks();
+    stage.removeChild(word);/////////
     newLevel();
     newLevel();
     createjs.Ticker.setPaused(false);
